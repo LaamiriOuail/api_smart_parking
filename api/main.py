@@ -1,103 +1,158 @@
-from flask import jsonify, request
-from flask_sqlalchemy import SQLAlchemy
 from flask_app import app
-from models.client import Client
-from models.abonement import Abonement
-from models.car import Car
 from database.database import db
-from crud.client import get_clients_c,get_client_by_id_c,create_client_c,update_client_c,delete_client_c,get_client_cars
-from crud.car import get_cars_c,get_car_by_id_c,create_car_c,update_car_c,delete_car_c,get_car_by_matricule_c,delete_car_by_matricule_c,get_car_ticket_by_id_c,get_car_ticket_by_matricule_c,get_cars_in_parking,get_number_cars_in_parking,get_number_cars
-from crud.abonement import get_abonements_c,get_abonement_c,create_abonement_c,get_abonement_by_matricule_car_c,update_abonement_c,delete_abonement_c
+from crud.client import (
+    get_clients_c, get_client_by_id_c, create_client_c,
+    update_client_c, delete_client_c, get_client_cars
+)
+from crud.car import (
+    get_cars_c, get_car_by_id_c, create_car_c, update_car_c,
+    delete_car_c, get_car_by_matricule_c, delete_car_by_matricule_c,
+    get_car_ticket_by_id_c, get_car_ticket_by_matricule_c,
+    get_number_cars_in_parking, get_cars_in_parking, get_number_cars,
+    create_car_cin_c
+)
+from crud.abonement import (
+    get_abonements_c, get_abonement_c, create_abonement_c,
+    get_abonement_by_matricule_car_c, update_abonement_c, delete_abonement_c,
+    create_abonement_matricule_c
+)
+
 with app.app_context():
     db.create_all()
+
 ##### CLIENT
+
 @app.route('/clients', methods=['GET'])
 def get_clients():
+    """Get all clients."""
     return get_clients_c()
 
 @app.route('/clients/<int:id>', methods=['GET'])
-def get_client(id:int):
+def get_client(id: int):
+    """Get a client by ID."""
     return get_client_by_id_c(id)
-
 
 @app.route('/clients', methods=['POST'])
 def create_client():
+    """Create a new client."""
     return create_client_c()
 
 @app.route('/clients/<int:id>', methods=['PUT'])
-def update_client(id:int):
+def update_client(id: int):
+    """Update a client by ID."""
     return update_client_c(id)
 
-
 @app.route('/clients/<int:id>', methods=['DELETE'])
-def delete_client(id:int):
+def delete_client(id: int):
+    """Delete a client by ID."""
     return delete_client_c(id)
+
 @app.route('/clients/<int:id>/cars', methods=['GET'])
-def get_cars_of_client(id:int):
+def get_cars_of_client(id: int):
+    """Get cars associated with a client."""
     return get_client_cars(id)
-###CARS
+
+### CARS
+
 @app.route('/cars', methods=['GET'])
 def get_cars():
+    """Get all cars."""
     return get_cars_c()
 
 @app.route('/cars/<int:id>', methods=['GET'])
-def get_car(id:int):
+def get_car(id: int):
+    """Get a car by ID."""
     return get_car_by_id_c(id)
 
 @app.route('/cars', methods=['POST'])
 def create_car():
+    """Create a new car."""
     return create_car_c()
 
+@app.route('/cars/add', methods=['POST'])
+def create_car_usign_client_cin():
+    """Create a new car."""
+    return create_car_cin_c()
+
 @app.route('/cars/<int:id>', methods=['PUT'])
-def update_car(id:int):
+def update_car(id: int):
+    """Update a car by ID."""
     return update_car_c(id)
 
 @app.route('/cars/<int:id>', methods=['DELETE'])
 def delete_car(id):
+    """Delete a car by ID."""
     return delete_car_c(id)
+
 @app.route('/cars/<string:matricule>', methods=['GET'])
 def get_car_by_matricule(matricule):
+    """Get a car by matricule."""
     return get_car_by_matricule_c(matricule)
+
 @app.route('/cars/<string:matricule>', methods=['DELETE'])
 def delete_car_by_matricule(matricule):
+    """Delete a car by matricule."""
     return delete_car_by_matricule_c(matricule)
+
 @app.route('/cars/ticket/<int:id>', methods=['PUT'])
-def get_car_ticket(id:int):
+def get_car_ticket(id: int):
+    """Get a ticket for a car by ID."""
     return get_car_ticket_by_id_c(id)
+
 @app.route('/cars/ticket/<string:matricule>', methods=['PUT'])
-def get_car_ticket_matricule(matricule:str):
+def get_car_ticket_matricule(matricule: str):
+    """Get a ticket for a car by matricule."""
     return get_car_ticket_by_matricule_c(matricule)
+
 @app.route('/cars/nbrinparking', methods=['GET'])
 def get_car_number_in_parking():
+    """Get the number of cars in parking."""
     return get_number_cars_in_parking()
+
 @app.route('/cars/inparking', methods=['GET'])
 def get_in_parking_cars():
+    """Get cars currently in parking."""
     return get_cars_in_parking()
+
 @app.route('/cars/nbr', methods=['GET'])
 def get_car_number():
+    """Get the total number of cars."""
     return get_number_cars()
+
 ### ABONEMENTS
+
 @app.route('/abonements', methods=['GET'])
 def get_abonements():
+    """Get all abonements."""
     return get_abonements_c()
 
 @app.route('/abonements/<int:id>', methods=['GET'])
 def get_abonement(id):
+    """Get an abonement by ID."""
     return get_abonement_c(id)
+
 @app.route('/abonements/cars/<string:matricule>', methods=['GET'])
-def get_abonement_by_matricule_car(matricule:str):
+def get_abonement_by_matricule_car(matricule: str):
+    """Get abonement by matricule of the associated car."""
     return get_abonement_by_matricule_car_c(matricule)
+
 @app.route('/abonements', methods=['POST'])
 def create_abonement():
+    """Create a new abonement."""
     return create_abonement_c()
-
+@app.route('/abonements/add', methods=['POST'])
+def create_abonement_matricule():
+    """Create a new abonement."""
+    return create_abonement_matricule_c()
 @app.route('/abonements/<int:id>', methods=['PUT'])
-def update_abonement(id:int):
+def update_abonement(id: int):
+    """Update an abonement by ID."""
     return update_abonement_c(id)
 
 @app.route('/abonements/<int:id>', methods=['DELETE'])
-def delete_abonement(id:int):
+def delete_abonement(id: int):
+    """Delete an abonement by ID."""
     return delete_abonement_c(id)
-if __name__ == '__main__':
-    app.run(debug=True,host="127.0.0.1",port=8000)
 
+if __name__ == '__main__':
+    app.run(debug=True, host="127.0.0.1", port=8000)

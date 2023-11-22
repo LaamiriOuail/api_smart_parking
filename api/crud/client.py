@@ -4,6 +4,12 @@ from flask import jsonify, request
 from database.database import db 
 
 def get_clients_c():
+    """
+    Get a list of all clients.
+
+    Returns:
+        tuple: A tuple containing a JSON response with client data and the HTTP status code.
+    """
     clients = Client.query.all()
     client_data = []
     for client in clients:
@@ -19,6 +25,15 @@ def get_clients_c():
     return jsonify(client_data), 200  # 200 OK
 
 def get_client_by_id_c(id:int):
+    """
+    Get client data by ID.
+
+    Args:
+        id (int): The ID of the client.
+
+    Returns:
+        tuple: A tuple containing a JSON response with client data and the HTTP status code.
+    """
     try:
         client = Client.query.get(id)
         client_data = {
@@ -35,6 +50,12 @@ def get_client_by_id_c(id:int):
         return jsonify({'message': f'Client not exist with this id {id}'}), 404  # 404 Not Found
 
 def create_client_c():
+    """
+    Create a new client.
+
+    Returns:
+        tuple: A tuple containing a JSON response with the creation status and the HTTP status code.
+    """
     fullname = request.json.get('fullname')
     email = request.json.get('email')
     phone_number = request.json.get('phone_number')
@@ -55,6 +76,15 @@ def create_client_c():
     return jsonify({'message': 'Client created successfully'}), 201  # 201 Created
 
 def update_client_c(id:int):
+    """
+    Update client information.
+
+    Args:
+        id (int): The ID of the client to update.
+
+    Returns:
+        tuple: A tuple containing a JSON response with the update status and the HTTP status code.
+    """
     try:
         client = Client.query.get(id)
         client.fullname = request.json.get('fullname', client.fullname)
@@ -68,6 +98,15 @@ def update_client_c(id:int):
         return jsonify({'message': f'Client not exist with this id {id}'}), 404  # 404 Not Found
 
 def delete_client_c(id:int):
+    """
+    Delete a client.
+
+    Args:
+        id (int): The ID of the client to delete.
+
+    Returns:
+        tuple: A tuple containing a JSON response with the deletion status and the HTTP status code.
+    """
     try:
         client = Client.query.get(id)
         db.session.delete(client)
@@ -77,6 +116,15 @@ def delete_client_c(id:int):
         return jsonify({'message': f'Client not exist with this id {id}'}), 404  # 404 Not Found
 
 def get_client_cars(id:int):
+    """
+    Get a list of cars associated with a client.
+
+    Args:
+        id (int): The ID of the client.
+
+    Returns:
+        tuple: A tuple containing a JSON response with car data and the HTTP status code.
+    """
     cars = Car.query.all()
     car_data = [{
         'id': car.id,
@@ -85,4 +133,4 @@ def get_client_cars(id:int):
         'model': car.model,
         'abonement': {'id': car.abonement.id if car.abonement else None}
     } for car in cars if car.client_id==id]
-    return jsonify(car_data), 200  # 200 OK 
+    return jsonify(car_data), 200  # 200 OK
