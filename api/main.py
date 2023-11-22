@@ -16,7 +16,9 @@ from crud.abonement import (
     get_abonement_by_matricule_car_c, update_abonement_c, delete_abonement_c,
     create_abonement_matricule_c
 )
-
+from crud.information import (
+    get_information,get_information_by_user_id
+)
 with app.app_context():
     db.create_all()
 
@@ -153,6 +155,18 @@ def update_abonement(id: int):
 def delete_abonement(id: int):
     """Delete an abonement by ID."""
     return delete_abonement_c(id)
-
+######## INFORMATION
+@app.route('/info', methods=['GET'])
+def get_info():
+    """GET INFORMATION."""
+    return get_information()
+@app.route('/info/<int:id>', methods=['GET'])
+def get_info_id(id:int):
+    """GET INFORMATION BY ID"""
+    return get_information_by_user_id(id)
+@app.route('/info/<string:matricule>', methods=['GET'])
+def get_info_matricule(matricule:str):
+    """GET INFORMATION BY MATRICULE"""
+    return get_information_by_user_id(matricule)
 if __name__ == '__main__':
     app.run(debug=True, host="127.0.0.1", port=8000)
