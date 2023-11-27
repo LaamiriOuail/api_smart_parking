@@ -232,7 +232,7 @@ def get_number_cars_in_parking():
     for car in cars:
         if car.is_in_parking:
             number += 1
-    return jsonify({"number": f"{number}"}), 200  # 200 OK 
+    return jsonify({"number": number}), 200  # 200 OK 
 
 def get_cars_in_parking():
     """
@@ -260,4 +260,4 @@ def get_number_cars():
         tuple: A tuple containing a JSON response with the number of cars and the HTTP status code.
     """
     cars = Car.query.all()
-    return jsonify({"number": f"{len(cars)}"}), 200  # 200 OK
+    return jsonify({"number": len(cars)}), 200  # 200 OK

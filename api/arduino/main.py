@@ -60,14 +60,18 @@ def search_abonement_by_car_id(car_id):
         # Close the cursor and connection
         cursor.close()
         connection.close()
-def change_sold_abonemt_by_id_car(car_id,ticket):
+def change_sold_abonemt_by_id_car(car_id, ticket):
     # Establish a connection to the database
-    connection ,cursor = get_connection()
+    connection, cursor = get_connection()
     try:
-        # Execute the query to search for a car by matricule
-        query = "SELECT id ,sold  FROM abonement WHERE car_id = %s"
-        cursor.execute(query, (car_id,))
-        # Fetch the result
+        # Execute the query to update the sold value for a given car_id
+        update_query = "UPDATE abonement SET sold = sold - %s WHERE car_id = %s"
+        cursor.execute(update_query, (ticket, car_id,))
+        print("updated !!!")
+        connection.commit()  # Commit the changes to the database
+        # After updating, retrieve the updated abonnement information
+        select_query = "SELECT id, sold FROM abonement WHERE car_id = %s"
+        cursor.execute(select_query, (car_id,))
         result = cursor.fetchone()
 
         if result:
@@ -82,12 +86,8 @@ def change_sold_abonemt_by_id_car(car_id,ticket):
         # Close the cursor and connection
         cursor.close()
         connection.close()
+
 ticket=3.5
-
-# import numpy as np
-
-# ...
-
 def main(serial_port: str):
     # Initialize the serial connection
     try:
@@ -96,55 +96,61 @@ def main(serial_port: str):
     except serial.SerialException as e:
         print(f"Error opening serial port: {e}")
         return
-
+    ser.write(b"c")
     cap = cv2.VideoCapture(0)
-
     try:
         while True:
             ret, frame = cap.read()
             matricule:str = pytesseract.image_to_string(frame)
-            matricule = matricule.strip()
-
+            matricule=matricule.strip()
+            
             try:
                 existing_car = search_car_by_matricule(matricule)
             except Exception as e:
                 existing_car = False
                 print(f"Error searching for car: {e}")
 
-            # ... (rest of your code remains unchanged)
-
+            # Display the text on the frame
+            cv2.putText(frame, f"Matricule: {matricule}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+            print(existing_car)
+            print(f"matricule : {matricule}")
             if existing_car:
-                # ... (rest of your code remains unchanged)
-
+                print("Car exist.")
+                car_id, matricule, is_in_parking, model, client_id = existing_car
                 if is_in_parking:
-                    print("o")  # Serial
-                    ser.write(b'o')  # Sending 'o' to the serial port
+                    ser.write(b'o')
+                    print("o")#serial
+                    # print("Car exists and is in the parking. Open door before user enters.")
                     cv2.putText(frame, "Car in parking - Open door before user enters", (10, 70),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
-                    print("c")  # Serial
-                    ser.write(b'c')  # Sending 'c' to the serial port
+                    ser.write(b'c')
+                    print("c")#serial
                 else:
-                    # ... (rest of your code remains unchanged)
-
-                    if sold >= ticket:
-                        print("O")  # Serial
-                        ser.write(b'O')  # Sending 'O' to the serial port
-                        cv2.putText(frame, "Car exists but is not in the parking. Open door after user exits", (10, 70),
-                                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
-                    else:
-                        print("s")  # Serial : sold insuffisant
-                        ser.write(b's')  # Sending 's' to the serial port
+                    abonement_car=search_abonement_by_car_id(car_id)
+                    if abonement_car:
+                        id_aboenemnt,sold=abonement_car
+                        if(sold>=ticket):
+                            change_sold_abonemt_by_id_car(car_id,ticket)
+                            print("O")#serial
+                            ser.write(b'O')
+                            # print("Car exists but is not in the parking. Open door after user exits.")
+                        else:
+                            print("s")#Serial : sold insuffisant
                     cv2.putText(frame, "Car not in parking - Open door after user exits", (10, 70),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-                    print("c")  # Serial
-                    ser.write(b'c')  # Sending 'c' to the serial port
+                    print("c")#serial
             else:
-                print("n")  # Serial
-                ser.write(b'n')  # Sending 'n' to the serial port
+                print("n")#serial
+                ser.write(b'n')
+                # print("Car not found. Not a client.")
                 cv2.putText(frame, "Car not found - Not a client", (10, 70), cv2.FONT_HERSHEY_SIMPLEX,
                             0.7, (0, 0, 255), 2)
 
-            # ... (rest of your code remains unchanged)
+            # Display the frame
+            cv2.imshow('Camera Test', frame)
+
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
 
     except Exception as e:
         print(f"Error: {e}")
@@ -152,10 +158,9 @@ def main(serial_port: str):
         cap.release()
         cv2.destroyAllWindows()
         print("Camera closed.")
-        # Close the serial connection
-        ser.close()
 
-# ... (rest of your code remains unchanged)
+
 
 if __name__ == "__main__":
-    main("COM1")  # Change "COM1" to the correct serial port on your system
+    main("/dev/ttyACM0")  # Change "COM1" to the correct serial port on your system
+
