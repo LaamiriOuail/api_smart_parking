@@ -28,29 +28,29 @@ void loop() {
     char receiveChar = Serial.read();
     lcd.setCursor(0, 1);
     lcd.clear();
-    if (receivedString == "O" || receivedString == "o") {//O:Welcome   , o:See you later
+    if (receiveChar == 'O' || receiveChar == 'o') {//O:Welcome   , o:See you later
       digitalWrite(ledBlue, HIGH);
       digitalWrite(ledRed, LOW);
       digitalWrite(ledGreen, LOW);
       myServo.write(180);
-      String fullname = Serial.readStringUntil('\n');//full name of user
-      if(receivedString == "o"){
+      //String fullname = Serial.readStringUntil('\n');//full name of user
+      if(receiveChar == 'o'){
         lcd.print("See you later !!");
-      }else if(receivedString == "O"){
+      }else if(receiveChar == 'O'){
         lcd.print("Welcome !!");
       }
       delay(3000);
-    } else if (receivedString == "C" ) {
+    } else if (receiveChar == 'C' ) {
       digitalWrite(ledBlue, LOW);
       digitalWrite(ledRed, HIGH);
       digitalWrite(ledGreen, LOW);
       myServo.write(90);
       lcd.print("I am a Smart parking");
       delay(3000);
-    }else if(receivedString == "n"){
+    }else if(receiveChar == 'n'){
       lcd.print("You are not a client");
       delay(1000);
-    }else if(receivedString == "s"){
+    }else if(receiveChar == 's'){
       lcd.print("You sold is insuffisant");
       delay(1000);
     }

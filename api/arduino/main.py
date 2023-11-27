@@ -1,7 +1,7 @@
 import serial
 import cv2
 import pytesseract
-
+import time
 
 import mysql.connector
 
@@ -67,8 +67,8 @@ def change_sold_abonemt_by_id_car(car_id, ticket):
         # Execute the query to update the sold value for a given car_id
         update_query = "UPDATE abonement SET sold = sold - %s WHERE car_id = %s"
         cursor.execute(update_query, (ticket, car_id,))
-        print("updated !!!")
         connection.commit()  # Commit the changes to the database
+        print("updated !!!")
         # After updating, retrieve the updated abonnement information
         select_query = "SELECT id, sold FROM abonement WHERE car_id = %s"
         cursor.execute(select_query, (car_id,))
@@ -86,7 +86,22 @@ def change_sold_abonemt_by_id_car(car_id, ticket):
         # Close the cursor and connection
         cursor.close()
         connection.close()
+def change_is_in_parking_by_id_car(car_id,is_in_parking):
+    # Establish a connection to the database
+    connection, cursor = get_connection()
+    try:
+        # Execute the query to update the sold value for a given car_id
+        update_query = "UPDATE car SET is_in_parking = %s WHERE id = %s"
+        cursor.execute(update_query, (is_in_parking, car_id,))
+        print("updated !!!")
+        connection.commit()  # Commit the changes to the database
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
 
+    finally:
+        # Close the cursor and connection
+        cursor.close()
+        connection.close()
 ticket=3.5
 def main(serial_port: str):
     # Initialize the serial connection
@@ -96,7 +111,7 @@ def main(serial_port: str):
     except serial.SerialException as e:
         print(f"Error opening serial port: {e}")
         return
-    ser.write(b"c")
+    ser.write(b"C")
     cap = cv2.VideoCapture(0)
     try:
         while True:
@@ -123,7 +138,8 @@ def main(serial_port: str):
                     # print("Car exists and is in the parking. Open door before user enters.")
                     cv2.putText(frame, "Car in parking - Open door before user enters", (10, 70),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
-                    ser.write(b'c')
+                    change_is_in_parking_by_id_car(car_id,False)
+                    ser.write(b'C')
                     print("c")#serial
                 else:
                     abonement_car=search_abonement_by_car_id(car_id)
@@ -131,14 +147,17 @@ def main(serial_port: str):
                         id_aboenemnt,sold=abonement_car
                         if(sold>=ticket):
                             change_sold_abonemt_by_id_car(car_id,ticket)
+                            change_is_in_parking_by_id_car(car_id,True)
                             print("O")#serial
                             ser.write(b'O')
+                            ser.write(b'C')
+                            print("c")#serial
                             # print("Car exists but is not in the parking. Open door after user exits.")
                         else:
                             print("s")#Serial : sold insuffisant
                     cv2.putText(frame, "Car not in parking - Open door after user exits", (10, 70),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-                    print("c")#serial
+                time.sleep(2)    
             else:
                 print("n")#serial
                 ser.write(b'n')
@@ -151,6 +170,7 @@ def main(serial_port: str):
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
+            
 
     except Exception as e:
         print(f"Error: {e}")
