@@ -44,3 +44,4 @@ class Car(db.Model):
             str: String representation of the Car.
         """
         return f"Car(id={self.id}, matricule='{self.matricule}', is_in_parking={self.is_in_parking}, model='{self.model}', client_id={self.client_id})"
+

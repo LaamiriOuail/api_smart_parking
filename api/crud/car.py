@@ -2,7 +2,7 @@ from models.client import Client
 from models.car import Car
 from flask import jsonify, request
 from database.database import db 
-
+ticket=12
 def get_cars_c():
     """
     Get a list of all cars.
@@ -189,7 +189,7 @@ def get_car_ticket_by_id_c(id:int):
         tuple: A tuple containing a JSON response with the ticket processing status and the HTTP status code.
     """
     try:
-        ticket=12
+        global ticket
         car = Car.query.get(id)
         if not car.is_in_parking:
             car.is_in_parking = True
@@ -210,7 +210,7 @@ def get_car_ticket_by_matricule_c(matricule:str):
         tuple: A tuple containing a JSON response with the ticket processing status and the HTTP status code.
     """
     try:
-        ticket=12
+        
         car = Car.query.filter_by(matricule=matricule).first_or_404()
         if not car.is_in_parking:
             car.is_in_parking = True

@@ -1,5 +1,6 @@
 from flask_app import app
 from database.database import db
+from flask import jsonify
 from crud.client import (
     get_clients_c, get_client_by_id_c, create_client_c,
     update_client_c, delete_client_c, get_client_cars
@@ -17,7 +18,7 @@ from crud.abonement import (
     create_abonement_matricule_c
 )
 from crud.information import (
-    get_information,get_information_by_user_id
+    get_information,get_information_by_car_matricule,update_info
 )
 with app.app_context():
     db.create_all()
@@ -160,13 +161,23 @@ def delete_abonement(id: int):
 def get_info():
     """GET INFORMATION."""
     return get_information()
-@app.route('/info/<int:id>', methods=['GET'])
-def get_info_id(id:int):
-    """GET INFORMATION BY ID"""
-    return get_information_by_user_id(id)
+
 @app.route('/info/<string:matricule>', methods=['GET'])
 def get_info_matricule(matricule:str):
     """GET INFORMATION BY MATRICULE"""
-    return get_information_by_user_id(matricule)
+    return get_information_by_car_matricule(matricule)\
+@app.route('/info/<int:id_client>', methods=['PUT'])
+def update_info_client(id_client:int):
+    return update_info(id_client,False,False)
+@app.route('/info/<int:id_client>/<int:id_car>', methods=['PUT'])
+def update_info_client_and_car(id_client:int,id_car:int):
+    return update_info(id_client,id_car,False)
+@app.route('/info/<int:id_client>/<int:id_car>/<int:id_abonement>', methods=['PUT'])
+def update_info_client_and_car_and_abonement(id_client:int,id_car:int,id_abonement:int):
+    return update_info(id_client,id_car,id_abonement)
+
 if __name__ == '__main__':
     app.run(debug=True, host="127.0.0.1", port=8000)
+    print("Hello Guys")
+    
+
