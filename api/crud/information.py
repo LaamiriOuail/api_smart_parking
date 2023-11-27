@@ -73,7 +73,6 @@ def get_information_by_car_matricule(matricule:str):
     client_id=Car.query.filter_by(matricule=matricule).first().id
     client=Client.query.filter_by(id=client_id).first()
     info:dict={
-                    "id": "",
                     "client_id":"",
                     "car_id":"",
                     "abonement_id":"",
@@ -91,12 +90,11 @@ def get_information_by_car_matricule(matricule:str):
                     "have_cars":""
                 }
     if client:
-        i:int=0
-        car=Car.query.filter_by(matricule=matricule).first()
-        if car :
+        if Car.car_exists_by_matricule(matricule) :
             have_cars=1
-            if car.abonement:
-                abonement=Abonement.query.filter_by(id=car.abonement.id).first()
+            car=Car.query.filter_by(matricule=matricule).first()
+            if Abonement.query.filter_by(car_id=car.id):
+                abonement=Abonement.query.filter_by(car_id=car.id).first()
                 abonement_sold=abonement.sold
                 abonement_create_at=abonement.create_at
                 have_abonement=1
@@ -104,9 +102,7 @@ def get_information_by_car_matricule(matricule:str):
                 abonement_sold=0
                 abonement_create_at=client.create_at
                 have_abonement=0
-            i=i+1
             info={
-                    "id": i,
                     "client_id":client.id,
                     "car_id":car.id,
                     "abonement_id":abonement.id if have_abonement else "",
@@ -123,28 +119,26 @@ def get_information_by_car_matricule(matricule:str):
                     "have_abonement":have_abonement,
                     "have_cars":have_cars
             }
-    else:
-        i=i+1
-        have_cars=0
-        have_abonement=0
-        info={
-            "id": i,
-            "client_id":client.id,
-            "car_id":"",
-            "abonement_id":"",
-            "fullname":client.fullname,
-            "cin":client.cin,
-            "email":client.email,
-            "phone_number":client.phone_number,
-            "age":client.age,
-            "sold":0,
-            "create_at":client.create_at,
-            "model":0,
-            "matricule":0,
-            "is_in_parking":0,
-            "have_abonement":have_abonement,
-            "have_cars":have_cars
-            }
+        else:
+            have_cars=0
+            have_abonement=0
+            info={
+                "client_id":client.id,
+                "car_id":"",
+                "abonement_id":"",
+                "fullname":client.fullname,
+                "cin":client.cin,
+                "email":client.email,
+                "phone_number":client.phone_number,
+                "age":client.age,
+                "sold":0,
+                "create_at":client.create_at,
+                "model":0,
+                "matricule":0,
+                "is_in_parking":0,
+                "have_abonement":have_abonement,
+                "have_cars":have_cars
+                }
     return jsonify(info),200        
 def update_info(id_client,id_car,id_abonement):
     """

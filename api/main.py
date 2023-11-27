@@ -165,7 +165,7 @@ def get_info():
 @app.route('/info/<string:matricule>', methods=['GET'])
 def get_info_matricule(matricule:str):
     """GET INFORMATION BY MATRICULE"""
-    return get_information_by_car_matricule(matricule)\
+    return get_information_by_car_matricule(matricule)
 @app.route('/info/<int:id_client>', methods=['PUT'])
 def update_info_client(id_client:int):
     return update_info(id_client,False,False)
