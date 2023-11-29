@@ -15,7 +15,7 @@ from crud.car import (
 from crud.abonement import (
     get_abonements_c, get_abonement_c, create_abonement_c,
     get_abonement_by_matricule_car_c, update_abonement_c, delete_abonement_c,
-    create_abonement_matricule_c
+    create_abonement_matricule_c,update_abonement_by_matricule_c
 )
 from crud.information import (
     get_information,get_information_by_car_matricule,update_info
@@ -155,7 +155,10 @@ def create_abonement_matricule():
 def update_abonement(id: int):
     """Update an abonement by ID."""
     return update_abonement_c(id)
-
+@app.route('/abonements/<string:matricule>', methods=['PUT'])
+def update_abonement(matricule: str):
+    """Update an abonement by ID."""
+    return update_abonement_by_matricule_c(id)
 @app.route('/abonements/<int:id>', methods=['DELETE'])
 def delete_abonement(id: int):
     """Delete an abonement by ID."""
@@ -193,7 +196,7 @@ def get_rapports_by_id_car(car_id:int):
     """GET INFORMATION."""
     return get_rapports_by_id_car_c(car_id)
 @app.route('/rapport/<string:car_matricule>', methods=['GET'])
-def get_rapports_by_matricule_car(car_matricule:int):
+def get_rapports_by_matricule_car(car_matricule:str):
     """GET INFORMATION."""
     return get_rapports_by_matricule_car_c(car_matricule)
 @app.route('/parking', methods=['GET'])
@@ -202,6 +205,5 @@ def get_rapports_parking():
     return get_rapports_parking_c()
 if __name__ == '__main__':
     app.run(debug=True, host="127.0.0.1", port=8000)
-    print("Hello Guys")
     
 

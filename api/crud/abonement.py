@@ -150,7 +150,14 @@ def update_abonement_c(id:int):
         return jsonify({'message': 'Abonement updated successfully'}), 200  # 200 OK
     except:
         return jsonify({'message': f'Abonement not exist with this id {id}'}), 404  # 404 Not Found
-
+def update_abonement_by_matricule_c(matricule:str):
+    car=Car.query.filter_by(matricule=matricule).first()
+    if car:
+        abonement = Abonement.query.filter_by(car_id=car.id).first()
+        if abonement:
+            return update_abonement_c(abonement.id)
+        else:
+            return jsonify({'message': f'Abonement not exist with this car matricule : {matricule}'}), 404  # 404 Not Found
 def delete_abonement_c(id:int):
     """
     Delete an abonement.
