@@ -1,8 +1,10 @@
 from models.abonement import Abonement
 from models.car import Car
+from models.client import Client
 from flask import jsonify, request
 from database.database import db 
-
+from crud.rapport import create_rapport_by_params_c
+from crud.parking import create_rapport_parking_paramrters_c
 def get_abonements_c():
     """
     Get a list of all abonements.
@@ -83,8 +85,11 @@ def create_abonement_c():
             sold=sold,
             car_id=car_id
         )
+        car=Car.query.filter_by(id=car_id).first()
         db.session.add(new_abonement)
         db.session.commit()
+        create_rapport_parking_paramrters_c(False,car_id,False,f"Cretae abonement with id : {new_abonement.id}, for car(matricule={car.matricule},client fullname={Client.query.filter_by(id=car.client_id).first().fullname}))")
+        create_rapport_by_params_c(car_id,f"Cretae abonement with id : {new_abonement.id}, for car(matricule={car.matricule},client fullname={Client.query.filter_by(id=car.client_id).first().fullname}))")
         return jsonify({'message': 'Abonement created successfully'}), 201  # 201 Created
     else:
         return jsonify({'message': f'Car not exist with this id {car_id}'}), 404  # 404 Not found
@@ -109,9 +114,11 @@ def create_abonement_matricule_c():
             sold=sold,
             car_id=car_id
         )
+        car=Car.query.filter_by(id=car_id).first()
         db.session.add(new_abonement)
         db.session.commit()
-
+        create_rapport_parking_paramrters_c(False,car_id,False,f"Cretae abonement with id : {new_abonement.id}, for car(matricule={car.matricule},client fullname={Client.query.filter_by(id=car.client_id).first().fullname}))")
+        create_rapport_by_params_c(car_id,f"Cretae abonement with id : {new_abonement.id}, for car(matricule={car.matricule},client fullname={Client.query.filter_by(id=car.client_id).first().fullname}))")
         return jsonify({'message': 'Abonement created successfully'}), 201  # 201 Created
     else:
         return jsonify({'message': f'Car not exist with this matricule {matricule}'}), 404  # 404 Not found
@@ -128,9 +135,18 @@ def update_abonement_c(id:int):
     """
     try:
         abonement = Abonement.query.get_or_404(id)
+        last_sold=abonement.sold
+        last_car_id=abonement.car_id
         abonement.sold = request.json.get('sold', abonement.sold)
         abonement.car_id = request.json.get('car_id', abonement.car_id)
         db.session.commit()
+        car=Car.query.filter_by(id=abonement.car_id).first()
+        if request.json.get('sold'):
+            create_rapport_parking_paramrters_c(False,abonement.car_id,False,f"Update solde of car from {last_sold} to {request.json.get('sold')}")
+            create_rapport_by_params_c(abonement.car_id,f"Update solde from {last_sold} to {request.json.get('sold')}")
+        if request.json.get('car_id'):
+            create_rapport_parking_paramrters_c(False,abonement.car_id,False,f"Update solde of car(matricule={car.matricule},client fullname={Client.query.filter_by(id=car.client_id).first().fullname}))  from {last_car_id} to {request.json.get('car_id')}")
+            create_rapport_by_params_c(abonement.car_id,f"Update id car of car(matricule={car.matricule},client fullname={Client.query.filter_by(id=car.client_id).first().fullname}))  from {last_car_id} to {request.json.get('car_id')}")
         return jsonify({'message': 'Abonement updated successfully'}), 200  # 200 OK
     except:
         return jsonify({'message': f'Abonement not exist with this id {id}'}), 404  # 404 Not Found
@@ -149,6 +165,9 @@ def delete_abonement_c(id:int):
         abonement = Abonement.query.get_or_404(id)
         db.session.delete(abonement)
         db.session.commit()
+        car=Car.query.filter_by(id=abonement.car_id).first()
+        create_rapport_parking_paramrters_c(False,abonement.car_id,False,f"delete abonement of car(matricule={car.matricule},client fullname={Client.query.filter_by(id=car.client_id).first().fullname}))")
+        create_rapport_by_params_c(abonement.car_id,f"delete abonement with id : {abonement.id} and car id : {abonement.car_id}")
         return jsonify({'message': 'Abonement deleted successfully'}), 200  # 200 OK
     except:
         return jsonify({'message': f'Abonement not exist with this id {id}'}), 404  # 404 Not Found

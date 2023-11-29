@@ -20,6 +20,10 @@ from crud.abonement import (
 from crud.information import (
     get_information,get_information_by_car_matricule,update_info
 )
+from crud.rapport import (
+    get_rapports_c,create_rapport_c,get_rapports_by_id_car_c,get_rapports_by_matricule_car_c
+    )
+from crud.parking import get_rapports_parking_c
 with app.app_context():
     db.create_all()
 
@@ -175,7 +179,27 @@ def update_info_client_and_car(id_client:int,id_car:int):
 @app.route('/info/<int:id_client>/<int:id_car>/<int:id_abonement>', methods=['PUT'])
 def update_info_client_and_car_and_abonement(id_client:int,id_car:int,id_abonement:int):
     return update_info(id_client,id_car,id_abonement)
-
+#### Rapports
+@app.route('/rapport', methods=['GET'])
+def get_rapports():
+    """GET INFORMATION."""
+    return get_rapports_c()
+@app.route('/rapport', methods=['POST'])
+def create_rapport():
+    """GET INFORMATION."""
+    return create_rapport_c()
+@app.route('/rapport/<int:car_id>', methods=['GET'])
+def get_rapports_by_id_car(car_id:int):
+    """GET INFORMATION."""
+    return get_rapports_by_id_car_c(car_id)
+@app.route('/rapport/<string:car_matricule>', methods=['GET'])
+def get_rapports_by_matricule_car(car_matricule:int):
+    """GET INFORMATION."""
+    return get_rapports_by_matricule_car_c(car_matricule)
+@app.route('/parking', methods=['GET'])
+def get_rapports_parking():
+    """GET INFORMATION."""
+    return get_rapports_parking_c()
 if __name__ == '__main__':
     app.run(debug=True, host="127.0.0.1", port=8000)
     print("Hello Guys")

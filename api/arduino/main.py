@@ -118,7 +118,6 @@ def main(serial_port: str):
             ret, frame = cap.read()
             matricule:str = pytesseract.image_to_string(frame)
             matricule=matricule.strip()
-            
             try:
                 existing_car = search_car_by_matricule(matricule)
             except Exception as e:

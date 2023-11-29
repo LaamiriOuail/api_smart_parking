@@ -2,7 +2,7 @@ from models.client import Client
 from models.car import Car
 from flask import jsonify, request
 from database.database import db 
-
+from crud.parking import create_rapport_parking_paramrters_c
 def get_clients_c():
     """
     Get a list of all clients.
@@ -72,7 +72,7 @@ def create_client_c():
     new_client = Client(fullname=fullname, email=email, phone_number=phone_number, cin=cin, age=age)
     db.session.add(new_client)
     db.session.commit()
-
+    create_rapport_parking_paramrters_c(new_client.id,False,False,f"Cretae client client(fullname={new_client.fullname},cin={new_client.cin})")
     return jsonify({'message': 'Client created successfully'}), 201  # 201 Created
 
 def update_client_c(id:int):
@@ -87,6 +87,16 @@ def update_client_c(id:int):
     """
     try:
         client = Client.query.get(id)
+        if request.json.get('fullname'):
+            create_rapport_parking_paramrters_c(client.id,False,False,f"Update fullname client(cin={client.cin}) from {client.fullname} to {request.json.get('fullname')}")
+        if request.json.get('email'):
+            create_rapport_parking_paramrters_c(client.id,False,False,f"Update email client(cin={client.cin}) from {client.email} to {request.json.get('email')}")
+        if request.json.get('phone_number'):
+            create_rapport_parking_paramrters_c(client.id,False,False,f"Update phone number client(cin={client.cin}) from {client.phone_number} to {request.json.get('phone_number')}")
+        if request.json.get('cin'):
+            create_rapport_parking_paramrters_c(client.id,False,False,f"Update cin client(fullname={client.fullname}) from {client.cin} to {request.json.get('cin')}")
+        if request.json.get('age'):
+            create_rapport_parking_paramrters_c(client.id,False,False,f"Update age client(cin={client.cin}) from {client.age} to {request.json.get('age')}")
         client.fullname = request.json.get('fullname', client.fullname)
         client.email = request.json.get('email', client.email)
         client.phone_number = request.json.get('phone_number', client.phone_number)
@@ -111,6 +121,7 @@ def delete_client_c(id:int):
         client = Client.query.get(id)
         db.session.delete(client)
         db.session.commit()
+        create_rapport_parking_paramrters_c(client.id,False,False,f"delete client(cin={client.cin},fullname={client.fullname})")
         return jsonify({'message': 'Client deleted successfully'}), 200  # 200 OK
     except:
         return jsonify({'message': f'Client not exist with this id {id}'}), 404  # 404 Not Found

@@ -2,6 +2,8 @@ from models.client import Client
 from models.car import Car
 from flask import jsonify, request
 from database.database import db 
+from crud.rapport import create_rapport_by_params_c
+from crud.parking import create_rapport_parking_paramrters_c
 ticket=12
 def get_cars_c():
     """
@@ -38,11 +40,12 @@ def create_car_c():
         existing_car = Car.query.filter_by(matricule=matricule).first()
         if existing_car:
             return jsonify({'message': 'Car already exists'}), 409  # 409 Conflict
-
+        client = Client.query.filter_by(id=client_id).first()
         new_car = Car(matricule=request.json.get('matricule'),is_in_parking=request.json.get('is_in_parking'),model=request.json.get('model'),client_id=request.json.get('client_id'))
         db.session.add(new_car)
         db.session.commit()
-
+        create_rapport_by_params_c(new_car.id,f"Car with id : {new_car.id} and client id : {client_id} created successfully")
+        create_rapport_parking_paramrters_c(client.id,False,False,f"Add new car with matricule {new_car.matricule} to client : fullname = {client.fullname},cin={client.cin},id={client.id}")
         return jsonify({'message': 'Car created successfully'}), 201  # 201 Created
     else:
          return jsonify({'message': f'Client not exist with this id {request.json.get("client_id")}'}), 404  # 404 Not Found
@@ -64,11 +67,12 @@ def create_car_cin_c():
         existing_car = Car.query.filter_by(matricule=matricule).first()
         if existing_car:
             return jsonify({'message': 'Car already exists'}), 409  # 409 Conflict
-        client_id=Client.query.filter_by(cin=cin).first().id
-        new_car = Car(matricule=request.json.get('matricule'),is_in_parking=request.json.get('is_in_parking'),model=request.json.get('model'),client_id=client_id)
+        client=Client.query.filter_by(cin=cin).first()
+        new_car = Car(matricule=request.json.get('matricule'),is_in_parking=request.json.get('is_in_parking'),model=request.json.get('model'),client_id=client.id)
         db.session.add(new_car)
         db.session.commit()
-
+        create_rapport_by_params_c(new_car.id,f"Car with id : {new_car.id} and client id : {client.id} created successfully")
+        create_rapport_parking_paramrters_c(client.id,False,False,f"Add new car with matricule {new_car.matricule} to client : fullname = {client.fullname},cin={client.cin},id={client.id}")
         return jsonify({'message': 'Car created successfully'}), 201  # 201 Created
     else:
          return jsonify({'message': f'Client not exist with this cin {cin}'}), 404  # 404 Not Found
@@ -85,6 +89,18 @@ def update_car_c(id:int):
     """
     try:
         car = Car.query.get(id)
+        if request.json.get('matricule'):
+            create_rapport_parking_paramrters_c(False,car.id,False,f"update matricule car(matricule={car.matricule}) of client {Client.query.filter_by(id=car.client_id).first().fullname} from {car.matricule} to {request.json.get('matricule')}")
+            create_rapport_by_params_c(car.id,f"update matricule car(matricule={car.matricule}) of client {Client.query.filter_by(id=car.client_id).first().fullname} from {car.matricule} to {request.json.get('matricule')}")
+        if request.json.get('is_in_parking'):
+            create_rapport_parking_paramrters_c(False,car.id,False,f"update is_in_parking car(matricule={car.matricule}) of client {Client.query.filter_by(id=car.client_id).first().fullname} from {car.is_in_parking} to {request.json.get('is_in_parking')}")
+            create_rapport_by_params_c(car.id,f"update is_in_parking car of client {Client.query.filter_by(id=car.client_id).first().fullname} from {car.is_in_parking} to {request.json.get('is_in_parking')}")
+        if request.json.get('model'):
+            create_rapport_parking_paramrters_c(False,car.id,False,f"update model car(matricule={car.matricule}) of client {Client.query.filter_by(id=car.client_id).first().fullname} from {car.model} to {request.json.get('model')}")
+            create_rapport_by_params_c(car.id,f"update model car(matricule={car.matricule}) of client {Client.query.filter_by(id=car.client_id).first().fullname} from {car.model} to {request.json.get('model')}")
+        if request.json.get('client_id'):
+            create_rapport_by_params_c(car.id,f"update client id car(matricule={car.matricule}) of client {Client.query.filter_by(id=car.client_id).first().fullname} from {car.client_id} to {request.json.get('client_id')}")
+            create_rapport_parking_paramrters_c(False,car.id,False,f"update client id car(matricule={car.matricule}) of client {Client.query.filter_by(id=car.client_id).first().fullname} from from {car.client_id} to {request.json.get('client_id')}")
         car.matricule = request.json.get('matricule', car.matricule)
         car.is_in_parking = request.json.get('is_in_parking', car.is_in_parking)
         car.model = request.json.get('model', car.model)
@@ -108,6 +124,8 @@ def delete_car_c(id:int):
         car = Car.query.get(id)
         db.session.delete(car)
         db.session.commit()
+        create_rapport_parking_paramrters_c(False,car.id,False,f"delte car(matricule={car.matricule}) of client {Client.query.filter_by(id=car.client_id).first().fullname}")
+        create_rapport_by_params_c(car.id,f"delete car(matricule={car.matricule}) with id  {car.id} of client {Client.query.filter_by(id=car.client_id).first().fullname}")
         return jsonify({'message': 'Car deleted successfully'}), 200  # 200 OK
     except:
         return jsonify({'message': f'Car not exist with this id {id}'}), 404  # 404 Not Found    
@@ -150,6 +168,8 @@ def delete_car_by_matricule_c(matricule: str):
         car = Car.query.filter_by(matricule=matricule).first_or_404()
         db.session.delete(car)
         db.session.commit()
+        create_rapport_parking_paramrters_c(False,car.id,False,f"delte car(matricule={car.matricule}) of client {Client.query.filter_by(id=car.client_id).first().fullname}")
+        create_rapport_by_params_c(car.id,f"delete car(matricule={car.matricule}) of client {Client.query.filter_by(id=car.client_id).first().fullname}")
         return jsonify({'message': 'Car deleted successfully'}), 200  # 200 OK
     except:
         return jsonify({'message': f'Car not exist with this matricule {matricule}'}), 404  # 404 Not Found
